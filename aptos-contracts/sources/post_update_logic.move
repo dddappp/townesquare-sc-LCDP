@@ -1,7 +1,7 @@
 module townesquare_sc::post_update_logic {
     use std::string::String;
     use townesquare_sc::post;
-    use townesquare_sc::post_updated;
+    use townesquare_sc::post_event;
 
     friend townesquare_sc::post_aggregate;
 
@@ -12,7 +12,7 @@ module townesquare_sc::post_update_logic {
         content: String,
         digest: String,
         post: &post::Post,
-    ): post::PostUpdated {
+    ): post::PostEvent {
         let _ = account;
         post::new_post_updated(
             post,
@@ -25,13 +25,13 @@ module townesquare_sc::post_update_logic {
 
     public(friend) fun mutate(
         _account: &signer,
-        post_updated: &post::PostUpdated,
+        post_updated: &post::PostEvent,
         post: post::Post,
     ): post::Post {
-        let poster = post_updated::poster(post_updated);
-        let user_id = post_updated::user_id(post_updated);
-        let content = post_updated::content(post_updated);
-        let digest = post_updated::digest(post_updated);
+        let poster = post_event::poster(post_updated);
+        let user_id = post_event::user_id(post_updated);
+        let content = post_event::content(post_updated);
+        let digest = post_event::digest(post_updated);
         let post_id = post::post_id(&post);
         let _ = post_id;
         post::set_poster(&mut post, poster);

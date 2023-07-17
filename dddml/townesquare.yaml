@@ -21,6 +21,43 @@ aggregates:
         type: String
         length: 66
 
+    methods:
+      Create:
+        event:
+          type: PostEvent
+          discriminatorValue: 0
+      Update:
+        event:
+          type: PostEvent
+          discriminatorValue: 1
+      Delete:
+        event:
+          type: PostEvent
+          discriminatorValue: 2
+
+    eventObjects:
+      PostEvent:
+        discriminator: EventType
+        properties:
+          EventType:
+            type: u8
+          # 
+          # You don't actually need to enter the following properties.
+          # The preprocessor generates them automatically.
+          # 
+          # PostId:
+          #   type: u128
+          # Version:
+          #   type: u64
+          # Poster:
+          #   type: address
+          # UserId:
+          #   type: String
+          # Content:
+          #   type: String
+          # Digest: 
+          #   type: String
+
   User:
     metadata:
       Preprocessors: [ "MOVE_CRUD_IT" ]

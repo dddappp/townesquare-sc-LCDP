@@ -6,7 +6,7 @@ module townesquare_sc::post_delete_logic {
     public(friend) fun verify(
         account: &signer,
         post: &post::Post,
-    ): post::PostDeleted {
+    ): post::PostEvent {
         let _ = account;
         post::new_post_deleted(
             post,
@@ -15,7 +15,7 @@ module townesquare_sc::post_delete_logic {
 
     public(friend) fun mutate(
         _account: &signer,
-        post_deleted: &post::PostDeleted,
+        post_deleted: &post::PostEvent,
         post: post::Post,
     ): post::Post {
         let post_id = post::post_id(&post);

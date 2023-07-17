@@ -21,9 +21,7 @@ module townesquare_sc::post {
 
     struct Events has key {
         // post_id_generator_created_handle: event::EventHandle<PostIdGeneratorCreated>,
-        post_created_handle: event::EventHandle<PostCreated>,
-        post_updated_handle: event::EventHandle<PostUpdated>,
-        post_deleted_handle: event::EventHandle<PostDeleted>,
+        post_event_handle: event::EventHandle<PostEvent>,
     }
 
     struct Tables has key {
@@ -41,9 +39,7 @@ module townesquare_sc::post {
         let res_account = genesis_account::resource_account_signer();
         move_to(&res_account, Events {
             // post_id_generator_created_handle: account::new_event_handle<PostIdGeneratorCreated>(&res_account),
-            post_created_handle: account::new_event_handle<PostCreated>(&res_account),
-            post_updated_handle: account::new_event_handle<PostUpdated>(&res_account),
-            post_deleted_handle: account::new_event_handle<PostDeleted>(&res_account),
+            post_event_handle: account::new_event_handle<PostEvent>(&res_account),
         });
 
         let post_id_generator = PostIdGenerator {
@@ -135,53 +131,8 @@ module townesquare_sc::post {
         }
     }
 
-    struct PostCreated has store, drop {
-        post_id: u128,
-        poster: address,
-        user_id: String,
-        content: String,
-        digest: String,
-    }
-
-    public fun post_created_post_id(post_created: &PostCreated): u128 {
-        post_created.post_id
-    }
-
-    public fun post_created_poster(post_created: &PostCreated): address {
-        post_created.poster
-    }
-
-    public fun post_created_user_id(post_created: &PostCreated): String {
-        post_created.user_id
-    }
-
-    public fun post_created_content(post_created: &PostCreated): String {
-        post_created.content
-    }
-
-    public fun post_created_digest(post_created: &PostCreated): String {
-        post_created.digest
-    }
-
-    public(friend) fun new_post_created(
-        poster: address,
-        user_id: String,
-        content: String,
-        digest: String,
-    ): PostCreated acquires PostIdGenerator {
-        assert!(exists<PostIdGenerator>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let post_id_generator = borrow_global_mut<PostIdGenerator>(genesis_account::resouce_account_address());
-        let post_id = next_post_id(post_id_generator);
-        PostCreated {
-            post_id,
-            poster,
-            user_id,
-            content,
-            digest,
-        }
-    }
-
-    struct PostUpdated has store, drop {
+    struct PostEvent has store, drop {
+        event_type: u8,
         post_id: u128,
         version: u64,
         poster: address,
@@ -190,24 +141,48 @@ module townesquare_sc::post {
         digest: String,
     }
 
-    public fun post_updated_post_id(post_updated: &PostUpdated): u128 {
-        post_updated.post_id
+    public fun post_event_event_type(post_event: &PostEvent): u8 {
+        post_event.event_type
     }
 
-    public fun post_updated_poster(post_updated: &PostUpdated): address {
-        post_updated.poster
+    public fun post_event_post_id(post_event: &PostEvent): u128 {
+        post_event.post_id
     }
 
-    public fun post_updated_user_id(post_updated: &PostUpdated): String {
-        post_updated.user_id
+    public fun post_event_poster(post_event: &PostEvent): address {
+        post_event.poster
     }
 
-    public fun post_updated_content(post_updated: &PostUpdated): String {
-        post_updated.content
+    public fun post_event_user_id(post_event: &PostEvent): String {
+        post_event.user_id
     }
 
-    public fun post_updated_digest(post_updated: &PostUpdated): String {
-        post_updated.digest
+    public fun post_event_content(post_event: &PostEvent): String {
+        post_event.content
+    }
+
+    public fun post_event_digest(post_event: &PostEvent): String {
+        post_event.digest
+    }
+
+    public(friend) fun new_post_created(
+        poster: address,
+        user_id: String,
+        content: String,
+        digest: String,
+    ): PostEvent acquires PostIdGenerator {
+        assert!(exists<PostIdGenerator>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
+        let post_id_generator = borrow_global_mut<PostIdGenerator>(genesis_account::resouce_account_address());
+        let post_id = next_post_id(post_id_generator);
+        PostEvent {
+            event_type: 0,
+            post_id,
+            version: 18446744073709551615, // max u64 for null
+            poster,
+            user_id,
+            content,
+            digest,
+        }
     }
 
     public(friend) fun new_post_updated(
@@ -216,8 +191,9 @@ module townesquare_sc::post {
         user_id: String,
         content: String,
         digest: String,
-    ): PostUpdated {
-        PostUpdated {
+    ): PostEvent {
+        PostEvent {
+            event_type: 1,
             post_id: post_id(post),
             version: version(post),
             poster,
@@ -227,21 +203,17 @@ module townesquare_sc::post {
         }
     }
 
-    struct PostDeleted has store, drop {
-        post_id: u128,
-        version: u64,
-    }
-
-    public fun post_deleted_post_id(post_deleted: &PostDeleted): u128 {
-        post_deleted.post_id
-    }
-
     public(friend) fun new_post_deleted(
         post: &Post,
-    ): PostDeleted {
-        PostDeleted {
+    ): PostEvent {
+        PostEvent {
+            event_type: 2,
             post_id: post_id(post),
             version: version(post),
+            poster: poster(post),
+            user_id: user_id(post),
+            content: content(post),
+            digest: digest(post),
         }
     }
 
@@ -322,22 +294,22 @@ module townesquare_sc::post {
         } = post;
     }
 
-    public(friend) fun emit_post_created(post_created: PostCreated) acquires Events {
+    public(friend) fun emit_post_created(post_created: PostEvent) acquires Events {
         assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
         let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
-        event::emit_event(&mut events.post_created_handle, post_created);
+        event::emit_event(&mut events.post_event_handle, post_created);
     }
 
-    public(friend) fun emit_post_updated(post_updated: PostUpdated) acquires Events {
+    public(friend) fun emit_post_updated(post_updated: PostEvent) acquires Events {
         assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
         let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
-        event::emit_event(&mut events.post_updated_handle, post_updated);
+        event::emit_event(&mut events.post_event_handle, post_updated);
     }
 
-    public(friend) fun emit_post_deleted(post_deleted: PostDeleted) acquires Events {
+    public(friend) fun emit_post_deleted(post_deleted: PostEvent) acquires Events {
         assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
         let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
-        event::emit_event(&mut events.post_deleted_handle, post_deleted);
+        event::emit_event(&mut events.post_event_handle, post_deleted);
     }
 
 }

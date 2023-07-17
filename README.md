@@ -144,7 +144,47 @@ aptos move run --function-id 'default::post_aggregate::create' \
 > More test examples ...
 
 
-### Modifying Business Logic
+
+## First Improvement
+
+Looking at the generated code, you might want to merge the three event types for `Post` operations into one. This would reduce the amount of code by quite a bit.
+
+We can do that.
+
+Modify the model file by adding these lines:
+
+```yaml
+    properties:
+      # ...
+      Digest: 
+        type: String
+        length: 66
+    # Add the following lines of code
+    methods:
+      Create:
+        event:
+          type: PostEvent
+          discriminatorValue: 0
+      Update:
+        event:
+          type: PostEvent
+          discriminatorValue: 1
+      Delete:
+        event:
+          type: PostEvent
+          discriminatorValue: 2
+    eventObjects:
+      PostEvent:
+        discriminator: EventType
+        properties:
+          EventType:
+            type: u8
+
+```
+
+Remove all Move code in the `sources` directory and re-execute the dddappp tool to generate that. You'll get an application that is no different in features, but more simplified.
+
+## Modifying Business Logic
 
 The tool has generated some files with the suffix `_logic.move` in the directory `aptos-contracts/sources`. 
 

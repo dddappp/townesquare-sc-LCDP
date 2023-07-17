@@ -1,7 +1,7 @@
 module townesquare_sc::post_create_logic {
     use std::string::String;
     use townesquare_sc::post;
-    use townesquare_sc::post_created;
+    use townesquare_sc::post_event;
 
     friend townesquare_sc::post_aggregate;
 
@@ -11,7 +11,7 @@ module townesquare_sc::post_create_logic {
         user_id: String,
         content: String,
         digest: String,
-    ): post::PostCreated {
+    ): post::PostEvent {
         let _ = account;
         post::new_post_created(
             poster,
@@ -23,12 +23,12 @@ module townesquare_sc::post_create_logic {
 
     public(friend) fun mutate(
         _account: &signer,
-        post_created: &post::PostCreated,
+        post_created: &post::PostEvent,
     ): post::Post {
-        let poster = post_created::poster(post_created);
-        let user_id = post_created::user_id(post_created);
-        let content = post_created::content(post_created);
-        let digest = post_created::digest(post_created);
+        let poster = post_event::poster(post_created);
+        let user_id = post_event::user_id(post_created);
+        let content = post_event::content(post_created);
+        let digest = post_event::digest(post_created);
         post::create_post(
             poster,
             user_id,
