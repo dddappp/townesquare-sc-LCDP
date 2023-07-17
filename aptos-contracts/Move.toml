@@ -1,0 +1,9 @@
+[package]
+name = "TownesquareSC"
+version = "0.0.1"
+
+[addresses]
+townesquare_sc = "_"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "aptos-cli-v1.0.11" }

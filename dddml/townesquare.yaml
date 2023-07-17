@@ -1,0 +1,50 @@
+aggregates:
+  Post:
+    metadata:
+      Preprocessors: [ "MOVE_CRUD_IT" ]
+    id:
+      name: PostId
+      type: u128
+      generator:
+        class: sequence
+        structName: PostIdGenerator
+    properties:
+      Poster:
+        type: address
+      UserId:
+        type: String
+        length: 66
+      Content:
+        type: String
+        length: 1000
+      Digest: 
+        type: String
+        length: 66
+
+  User:
+    metadata:
+      Preprocessors: [ "MOVE_CRUD_IT" ]
+    id:
+      name: UserWallet
+      type: address
+    properties:
+      Username:
+        type: String
+        length: 66
+      ProfileImage:
+        type: String
+      Bio:
+        type: String
+
+singletonObjects:
+  TownesquareState:
+    metadata:
+      Preprocessors: [ "MOVE_CRUD_IT" ]
+    properties:
+      IsEmergency:
+        type: bool
+      UserAdmin:
+        type: address
+      PostAdmin:
+        type: address
+
