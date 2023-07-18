@@ -7,6 +7,7 @@ module townesquare_sc::townesquare_state_delete_logic {
         account: &signer,
         townesquare_state: &townesquare_state::TownesquareState,
     ): townesquare_state::TownesquareStateDeleted {
+        townesquare_sc::genesis_account::assert_genesis_account(account);
         let _ = account;
         townesquare_state::new_townesquare_state_deleted(
             townesquare_state,

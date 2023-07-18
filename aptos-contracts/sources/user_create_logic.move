@@ -5,6 +5,10 @@ module townesquare_sc::user_create_logic {
 
     friend townesquare_sc::user_aggregate;
 
+    use  townesquare_sc::townesquare_state;
+    const EIS_EMERGENCY: u64 = 117;
+    const EINVALID_ACCOUNT: u64 = 118;
+
     public(friend) fun verify(
         account: &signer,
         user_wallet: address,
@@ -12,6 +16,8 @@ module townesquare_sc::user_create_logic {
         profile_image: String,
         bio: String,
     ): user::UserCreated {
+        assert!(!townesquare_state::singleton_is_emergency(), EIS_EMERGENCY);
+        assert!(user_wallet == std::signer::address_of(account), EINVALID_ACCOUNT);
         let _ = account;
         user::asset_user_not_exists(user_wallet);
         user::new_user_created(

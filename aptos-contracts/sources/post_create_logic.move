@@ -5,6 +5,10 @@ module townesquare_sc::post_create_logic {
 
     friend townesquare_sc::post_aggregate;
 
+    use  townesquare_sc::townesquare_state;
+    const EIS_EMERGENCY: u64 = 117;
+    const EINVALID_ACCOUNT: u64 = 118;
+
     public(friend) fun verify(
         account: &signer,
         poster: address,
@@ -12,6 +16,8 @@ module townesquare_sc::post_create_logic {
         content: String,
         digest: String,
     ): post::PostEvent {
+        assert!(!townesquare_state::singleton_is_emergency(), EIS_EMERGENCY);
+        assert!(poster == std::signer::address_of(account), EINVALID_ACCOUNT);
         let _ = account;
         post::new_post_created(
             poster,

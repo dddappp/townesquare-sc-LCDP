@@ -10,6 +10,7 @@ module townesquare_sc::townesquare_state_create_logic {
         user_admin: address,
         post_admin: address,
     ): townesquare_state::TownesquareStateCreated {
+        townesquare_sc::genesis_account::assert_genesis_account(account);
         let _ = account;
         townesquare_state::new_townesquare_state_created(
             is_emergency,

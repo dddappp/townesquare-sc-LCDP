@@ -233,12 +233,118 @@ Above, the `MOVE_CRUD_IT` preprocessor already generates the full CRUD methods f
 
 For example, in our example here, you will most likely need to add some permission control logic to the user's operations.
 
-> TODO
-> 
-> We'll talk about how to modify the code later.
->
+### Only Certain Account Can Modify Global Config
+
+Open the file `townesquare_state_create_logic.move` and add a line of code at the beginning of the `verify` method:
+
+```move
+    public(friend) fun verify(
+        // ...
+    ): townesquare_state::TownesquareStateCreated {
+        // Add the following line of code
+        townesquare_sc::genesis_account::assert_genesis_account(account);
+        // ...
+    }
+```
+
+Open the `townesquare_state_update_logic.move` and `townesquare_state_delete_logic.move` files, respectively. Make the same modifications.
+
+### Modify the Logic of Creating Post
+
+Open the file `post_create_logic.move`, add 5 lines of code as noted in the comments below:
+
+```move
+    friend townesquare_sc::post_aggregate;
+
+    // Add the following 3 lines
+    use  townesquare_sc::townesquare_state;
+    const EIS_EMERGENCY: u64 = 117;
+    const EINVALID_ACCOUNT: u64 = 118;
+
+    public(friend) fun verify(
+        // ...
+    ): post::PostEvent {
+        // Add the following 2 lines
+        assert!(!townesquare_state::singleton_is_emergency(), EIS_EMERGENCY);
+        assert!(poster == std::signer::address_of(account), EINVALID_ACCOUNT);
+        // ...
+    }
+```
+
+### Modify the Logic of Deleting Post
+
+Open the file `post_delete_logic.move`, add 5 lines of code as noted in the comments below:
+
+```move
+    friend townesquare_sc::post_aggregate;
+
+    // Add the following 3 lines
+    use townesquare_sc::townesquare_state;
+    const EIS_EMERGENCY: u64 = 117;
+    const EINVALID_ACCOUNT: u64 = 118;
+
+    public(friend) fun verify(
+        // ...
+    ): post::PostEvent {
+        // Add the following 2 lines
+        assert!(!townesquare_state::singleton_is_emergency(), EIS_EMERGENCY);
+        assert!(townesquare_state::singleton_post_admin() == std::signer::address_of(account) || post::poster(post) == std::signer::address_of(account), EINVALID_ACCOUNT);
+        // ...
+    }
+```
+
+### Modify the Logic of Creating User
+
+Open the file `user_create_logic.move`, add 5 lines of code as noted in the comments below:
+
+```move
+    friend townesquare_sc::user_aggregate;
+
+    // Add the following 3 lines
+    use  townesquare_sc::townesquare_state;
+    const EIS_EMERGENCY: u64 = 117;
+    const EINVALID_ACCOUNT: u64 = 118;
+
+    public(friend) fun verify(
+        // ...
+    ): user::UserCreated {
+        // Add the following 2 lines
+        assert!(!townesquare_state::singleton_is_emergency(), EIS_EMERGENCY);
+        assert!(user_wallet == std::signer::address_of(account), EINVALID_ACCOUNT);
+        // ...
+    }
+```
+
+### Modify the Logic of Updating User
+
+Open the file `user_update_logic.move`, add 5 lines of code as noted in the comments below:
+
+```move
+    friend townesquare_sc::user_aggregate;
+
+    // Add the following 3 lines
+    use  townesquare_sc::townesquare_state;
+    const EIS_EMERGENCY: u64 = 117;
+    const EINVALID_ACCOUNT: u64 = 118;
+
+    public(friend) fun verify(
+        // ...
+    ): user::UserUpdated {
+        // Add the following 2 lines
+        assert!(!townesquare_state::singleton_is_emergency(), EIS_EMERGENCY);
+        assert!(user::user_wallet(user) == std::signer::address_of(account), EINVALID_ACCOUNT);
+        // ...
+    }
+```
+
+---
+
+Above, we have added a total of 23 lines of code. Now we've got a feature-equivalent to the original version.
+
 
 ## References
+
+The DDDML model-driven Low-Code development approach is very powerful, and you can learn more about it at these links.
 
 * [Developing a Blog Example on Aptos](https://github.com/dddappp/aptos-blog-example). It only requires 30 or so lines of code (all of which is a description of the domain model) to be written by the developer, and then generates a blog example that emulates [RoR Getting Started](https://guides.rubyonrails.org/getting_started.html) in one click, without requiring the developer to write a single line of other code.
 * [Developing a Blog Example on Rooch](https://github.com/rooch-network/rooch/blob/main/examples/blog/README.md). A Rooch version of blog sample.

@@ -5,6 +5,10 @@ module townesquare_sc::user_update_logic {
 
     friend townesquare_sc::user_aggregate;
 
+    use  townesquare_sc::townesquare_state;
+    const EIS_EMERGENCY: u64 = 117;
+    const EINVALID_ACCOUNT: u64 = 118;
+
     public(friend) fun verify(
         account: &signer,
         username: String,
@@ -12,6 +16,8 @@ module townesquare_sc::user_update_logic {
         bio: String,
         user: &user::User,
     ): user::UserUpdated {
+        assert!(!townesquare_state::singleton_is_emergency(), EIS_EMERGENCY);
+        assert!(user::user_wallet(user) == std::signer::address_of(account), EINVALID_ACCOUNT);
         let _ = account;
         user::new_user_updated(
             user,

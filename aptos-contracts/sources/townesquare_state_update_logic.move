@@ -11,6 +11,7 @@ module townesquare_sc::townesquare_state_update_logic {
         post_admin: address,
         townesquare_state: &townesquare_state::TownesquareState,
     ): townesquare_state::TownesquareStateUpdated {
+        townesquare_sc::genesis_account::assert_genesis_account(account);
         let _ = account;
         townesquare_state::new_townesquare_state_updated(
             townesquare_state,
