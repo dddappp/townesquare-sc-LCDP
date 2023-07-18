@@ -12,7 +12,6 @@ module townesquare_sc::user {
     use townesquare_sc::pass_object;
     friend townesquare_sc::user_create_logic;
     friend townesquare_sc::user_update_logic;
-    friend townesquare_sc::user_delete_logic;
     friend townesquare_sc::user_aggregate;
 
     const EID_ALREADY_EXISTS: u64 = 101;
@@ -23,7 +22,6 @@ module townesquare_sc::user {
     struct Events has key {
         user_created_handle: event::EventHandle<UserCreated>,
         user_updated_handle: event::EventHandle<UserUpdated>,
-        user_deleted_handle: event::EventHandle<UserDeleted>,
     }
 
     struct Tables has key {
@@ -37,7 +35,6 @@ module townesquare_sc::user {
         move_to(&res_account, Events {
             user_created_handle: account::new_event_handle<UserCreated>(&res_account),
             user_updated_handle: account::new_event_handle<UserUpdated>(&res_account),
-            user_deleted_handle: account::new_event_handle<UserDeleted>(&res_account),
         });
 
         move_to(
@@ -182,24 +179,6 @@ module townesquare_sc::user {
         }
     }
 
-    struct UserDeleted has store, drop {
-        user_wallet: address,
-        version: u64,
-    }
-
-    public fun user_deleted_user_wallet(user_deleted: &UserDeleted): address {
-        user_deleted.user_wallet
-    }
-
-    public(friend) fun new_user_deleted(
-        user: &User,
-    ): UserDeleted {
-        UserDeleted {
-            user_wallet: user_wallet(user),
-            version: version(user),
-        }
-    }
-
 
     public(friend) fun create_user(
         user_wallet: address,
@@ -278,12 +257,6 @@ module townesquare_sc::user {
         assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
         let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
         event::emit_event(&mut events.user_updated_handle, user_updated);
-    }
-
-    public(friend) fun emit_user_deleted(user_deleted: UserDeleted) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
-        event::emit_event(&mut events.user_deleted_handle, user_deleted);
     }
 
 }

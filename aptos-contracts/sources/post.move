@@ -11,7 +11,6 @@ module townesquare_sc::post {
     use townesquare_sc::genesis_account;
     use townesquare_sc::pass_object;
     friend townesquare_sc::post_create_logic;
-    friend townesquare_sc::post_update_logic;
     friend townesquare_sc::post_delete_logic;
     friend townesquare_sc::post_aggregate;
 
@@ -185,24 +184,6 @@ module townesquare_sc::post {
         }
     }
 
-    public(friend) fun new_post_updated(
-        post: &Post,
-        poster: address,
-        user_id: String,
-        content: String,
-        digest: String,
-    ): PostEvent {
-        PostEvent {
-            event_type: 1,
-            post_id: post_id(post),
-            version: version(post),
-            poster,
-            user_id,
-            content,
-            digest,
-        }
-    }
-
     public(friend) fun new_post_deleted(
         post: &Post,
     ): PostEvent {
@@ -298,12 +279,6 @@ module townesquare_sc::post {
         assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
         let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
         event::emit_event(&mut events.post_event_handle, post_created);
-    }
-
-    public(friend) fun emit_post_updated(post_updated: PostEvent) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
-        event::emit_event(&mut events.post_event_handle, post_updated);
     }
 
     public(friend) fun emit_post_deleted(post_deleted: PostEvent) acquires Events {

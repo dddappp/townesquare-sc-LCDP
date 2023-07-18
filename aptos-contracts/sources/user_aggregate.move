@@ -7,7 +7,6 @@ module townesquare_sc::user_aggregate {
     use std::string::String;
     use townesquare_sc::user;
     use townesquare_sc::user_create_logic;
-    use townesquare_sc::user_delete_logic;
     use townesquare_sc::user_update_logic;
 
     public entry fun create(
@@ -54,24 +53,6 @@ module townesquare_sc::user_aggregate {
         );
         user::update_version_and_add(updated_user);
         user::emit_user_updated(user_updated);
-    }
-
-    public entry fun delete(
-        account: &signer,
-        user_wallet: address,
-    ) {
-        let user = user::remove_user(user_wallet);
-        let user_deleted = user_delete_logic::verify(
-            account,
-            &user,
-        );
-        let updated_user = user_delete_logic::mutate(
-            account,
-            &user_deleted,
-            user,
-        );
-        user::drop_user(updated_user);
-        user::emit_user_deleted(user_deleted);
     }
 
 }

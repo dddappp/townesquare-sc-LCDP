@@ -8,7 +8,6 @@ module townesquare_sc::post_aggregate {
     use townesquare_sc::post;
     use townesquare_sc::post_create_logic;
     use townesquare_sc::post_delete_logic;
-    use townesquare_sc::post_update_logic;
 
     public entry fun create(
         account: &signer,
@@ -30,32 +29,6 @@ module townesquare_sc::post_aggregate {
         );
         post::add_post(post);
         post::emit_post_created(post_created);
-    }
-
-    public entry fun update(
-        account: &signer,
-        post_id: u128,
-        poster: address,
-        user_id: String,
-        content: String,
-        digest: String,
-    ) {
-        let post = post::remove_post(post_id);
-        let post_updated = post_update_logic::verify(
-            account,
-            poster,
-            user_id,
-            content,
-            digest,
-            &post,
-        );
-        let updated_post = post_update_logic::mutate(
-            account,
-            &post_updated,
-            post,
-        );
-        post::update_version_and_add(updated_post);
-        post::emit_post_updated(post_updated);
     }
 
     public entry fun delete(

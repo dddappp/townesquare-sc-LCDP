@@ -184,6 +184,45 @@ Modify the model file by adding these lines:
 
 Remove all Move code in the `sources` directory and re-execute the dddappp tool to generate that. You'll get an application that is no different in features, but more simplified.
 
+## Second Improvement
+
+The original contracts don't have "Update Post" and "Delete User" operations, and you probably want the Low-Code version to be the same.
+
+Of course, we can tell the preprocessor not to generate these methods.
+
+Follow the instructions in the comments below to modify the model file:
+
+```yaml
+aggregates:
+  Post:
+    metadata:
+      Preprocessors: [ "MOVE_CRUD_IT" ]
+      # Add the following line
+      CRUD_IT_NO_UPDATE: true
+    # ...
+    methods:
+      # ...
+      # Comment out or remove the following 4 lines
+      # Update:
+      #   event:
+      #     type: PostEvent
+      #     discriminatorValue: 1
+
+  # ...
+  User:
+    metadata:
+      Preprocessors: [ "MOVE_CRUD_IT" ]
+      # Add the following line of code
+      CRUD_IT_NO_DELETE: true
+```
+
+Remove all Move code in the `sources` directory and re-execute the dddappp tool to generate that.
+
+> **Hint**
+>
+> Since the dddappp v0.0.1 docker image is updated frequently, you may be required to manually delete the image and pull it again before `docker run`.
+
+
 ## Modifying Business Logic
 
 The tool has generated some files with the suffix `_logic.move` in the directory `aptos-contracts/sources`. 

@@ -12,14 +12,6 @@ aptos move run --function-id 'default::post_aggregate::create' \
 --assume-yes
 ```
 
-### Update method
-
-```shell
-aptos move run --function-id 'default::post_aggregate::update' \
---args u128:post_id address:poster 'string:user_id' 'string:content' 'string:digest' \
---assume-yes
-```
-
 ### Delete method
 
 ```shell
@@ -43,14 +35,6 @@ aptos move run --function-id 'default::user_aggregate::create' \
 ```shell
 aptos move run --function-id 'default::user_aggregate::update' \
 --args address:user_wallet 'string:username' 'string:profile_image' 'string:bio' \
---assume-yes
-```
-
-### Delete method
-
-```shell
-aptos move run --function-id 'default::user_aggregate::delete' \
---args address:user_wallet \
 --assume-yes
 ```
 
