@@ -184,6 +184,21 @@ module townesquare_sc::townesquare_state {
         pass_object::new(townesquare_state)
     }
 
+    public fun singleton_is_emergency(): bool acquires TownesquareState {
+        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resouce_account_address());
+        townesquare_state.is_emergency
+    }
+
+    public fun singleton_user_admin(): address acquires TownesquareState {
+        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resouce_account_address());
+        townesquare_state.user_admin
+    }
+
+    public fun singleton_post_admin(): address acquires TownesquareState {
+        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resouce_account_address());
+        townesquare_state.post_admin
+    }
+
     public fun return_townesquare_state(townesquare_state_pass_obj: pass_object::PassObject<TownesquareState>) {
         let townesquare_state = pass_object::extract(townesquare_state_pass_obj);
         private_add_townesquare_state(townesquare_state);
