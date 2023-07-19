@@ -8,7 +8,7 @@ aggregates:
       type: u128
       generator:
         class: sequence
-        structName: PostIdGenerator
+        # structName: PostIdGenerator #The default value is actually this
     properties:
       Poster:
         type: address
