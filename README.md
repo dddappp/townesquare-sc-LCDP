@@ -343,7 +343,7 @@ Above, we have added a total of 23 lines of code. Now we've got a feature-equiva
 
 ## Test Off-chain Service
 
-After running the latest version of the dddappp tool, an Off-chain service project will be generated in the aptos directory. 
+After running the latest version of the dddappp tool, an Off-chain service project will be generated in the `aptos-java-service` directory. 
 It can pull application events and entity states on the chain into the off-chain database, and provides query APIs.
 
 ### Prerequisites
