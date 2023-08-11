@@ -374,7 +374,7 @@ Use a MySQL client to connect to the local MySQL server and execute the followin
 CREATE SCHEMA `test2` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 ```
 
-Go to the `sui-java-service` directory and package the Java project:
+Go to the `aptos-java-service` directory and package the Java project:
 
 ```shell
 mvn package
@@ -389,7 +389,7 @@ java -jar ./townesquaresc-service-cli/target/townesquaresc-service-cli-0.0.1-SNA
 
 ### Configuring Off-Chain Service
 
-Open the `application-test.yml` file located in the directory `sui-java-service/townesquaresc-service-rest/src/main/resources` and set the published contract address. 
+Open the `application-test.yml` file located in the directory `aptos-java-service/townesquaresc-service-rest/src/main/resources` and set the published contract address. 
 After setting, it should look like this:
 
 ```yaml
@@ -403,7 +403,7 @@ aptos:
 
 ### Starting Off-Chain Service
 
-In the `sui-java-service` directory, run the following command to start the off-chain service:
+In the `aptos-java-service` directory, run the following command to start the off-chain service:
 
 ```shell
 mvn -pl townesquaresc-service-rest -am spring-boot:run
