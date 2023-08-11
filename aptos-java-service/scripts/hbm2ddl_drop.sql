@@ -1,0 +1,9 @@
+drop table if exists aptos_account;
+drop table if exists hibernate_hello;
+drop table if exists hibernate_sequences;
+drop table if exists post;
+drop table if exists post_event;
+drop table if exists townesquare_state;
+drop table if exists townesquare_state_event;
+drop table if exists user;
+drop table if exists user_event;
