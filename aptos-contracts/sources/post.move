@@ -14,9 +14,9 @@ module townesquare_sc::post {
     friend townesquare_sc::post_delete_logic;
     friend townesquare_sc::post_aggregate;
 
-    const EDATA_TOO_LONG: u64 = 102;
-    const EINAPPROPRIATE_VERSION: u64 = 103;
-    const ENOT_INITIALIZED: u64 = 110;
+    const EDataTooLong: u64 = 102;
+    const EInappropriateVersion: u64 = 103;
+    const ENotInitialized: u64 = 110;
 
     struct Events has key {
         // post_id_generator_created_handle: event::EventHandle<PostIdGeneratorCreated>,
@@ -45,9 +45,6 @@ module townesquare_sc::post {
             sequence: 0,
         };
         move_to(&res_account, post_id_generator);
-        // let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
-        // event::emit_event(&mut events.post_id_generator_created_handle, PostIdGeneratorCreated {
-        // });
 
         move_to(
             &res_account,
@@ -88,7 +85,7 @@ module townesquare_sc::post {
     }
 
     public(friend) fun set_user_id(post: &mut Post, user_id: String) {
-        assert!(std::string::length(&user_id) <= 66, EDATA_TOO_LONG);
+        assert!(std::string::length(&user_id) <= 66, EDataTooLong);
         post.user_id = user_id;
     }
 
@@ -97,7 +94,7 @@ module townesquare_sc::post {
     }
 
     public(friend) fun set_content(post: &mut Post, content: String) {
-        assert!(std::string::length(&content) <= 1000, EDATA_TOO_LONG);
+        assert!(std::string::length(&content) <= 1000, EDataTooLong);
         post.content = content;
     }
 
@@ -106,7 +103,7 @@ module townesquare_sc::post {
     }
 
     public(friend) fun set_digest(post: &mut Post, digest: String) {
-        assert!(std::string::length(&digest) <= 66, EDATA_TOO_LONG);
+        assert!(std::string::length(&digest) <= 66, EDataTooLong);
         post.digest = digest;
     }
 
@@ -117,9 +114,9 @@ module townesquare_sc::post {
         content: String,
         digest: String,
     ): Post {
-        assert!(std::string::length(&user_id) <= 66, EDATA_TOO_LONG);
-        assert!(std::string::length(&content) <= 1000, EDATA_TOO_LONG);
-        assert!(std::string::length(&digest) <= 66, EDATA_TOO_LONG);
+        assert!(std::string::length(&user_id) <= 66, EDataTooLong);
+        assert!(std::string::length(&content) <= 1000, EDataTooLong);
+        assert!(std::string::length(&digest) <= 66, EDataTooLong);
         Post {
             post_id,
             version: 0,
@@ -170,8 +167,8 @@ module townesquare_sc::post {
         content: String,
         digest: String,
     ): PostEvent acquires PostIdGenerator {
-        assert!(exists<PostIdGenerator>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let post_id_generator = borrow_global_mut<PostIdGenerator>(genesis_account::resouce_account_address());
+        assert!(exists<PostIdGenerator>(genesis_account::resource_account_address()), ENotInitialized);
+        let post_id_generator = borrow_global_mut<PostIdGenerator>(genesis_account::resource_account_address());
         let post_id = next_post_id(post_id_generator);
         PostEvent {
             event_type: 0,
@@ -205,8 +202,8 @@ module townesquare_sc::post {
         content: String,
         digest: String,
     ): Post acquires PostIdGenerator {
-        assert!(exists<PostIdGenerator>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let post_id_generator = borrow_global<PostIdGenerator>(genesis_account::resouce_account_address());
+        assert!(exists<PostIdGenerator>(genesis_account::resource_account_address()), ENotInitialized);
+        let post_id_generator = borrow_global<PostIdGenerator>(genesis_account::resource_account_address());
         let post_id = current_post_id(post_id_generator);
         let post = new_post(
             post_id,
@@ -233,25 +230,25 @@ module townesquare_sc::post {
 
     public(friend) fun update_version_and_add(post: Post) acquires Tables {
         post.version = post.version + 1;
-        //assert!(post.version != 0, EINAPPROPRIATE_VERSION);
+        //assert!(post.version != 0, EInappropriateVersion);
         private_add_post(post);
     }
 
     public(friend) fun add_post(post: Post) acquires Tables {
-        assert!(post.version == 0, EINAPPROPRIATE_VERSION);
+        assert!(post.version == 0, EInappropriateVersion);
         private_add_post(post);
     }
 
     public(friend) fun remove_post(post_id: u128): Post acquires Tables {
-        assert!(exists<Tables>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let tables = borrow_global_mut<Tables>(genesis_account::resouce_account_address());
+        assert!(exists<Tables>(genesis_account::resource_account_address()), ENotInitialized);
+        let tables = borrow_global_mut<Tables>(genesis_account::resource_account_address());
         table::remove(&mut tables.post_table, post_id)
     }
 
     fun private_add_post(post: Post) acquires Tables {
-        assert!(exists<Tables>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let tables = borrow_global_mut<Tables>(genesis_account::resouce_account_address());
-        table::add(&mut tables.post_table, post_id(&post), post);
+        assert!(exists<Tables>(genesis_account::resource_account_address()), ENotInitialized);
+        let tables = borrow_global_mut<Tables>(genesis_account::resource_account_address());
+        table::add(&mut tables.post_table, post.post_id, post);
     }
 
     public fun get_post(post_id: u128): pass_object::PassObject<Post> acquires Tables {
@@ -275,15 +272,20 @@ module townesquare_sc::post {
         } = post;
     }
 
+    public fun contains_post(post_id: u128): bool acquires Tables {
+        let tables = borrow_global<Tables>(genesis_account::resource_account_address());
+        table::contains(&tables.post_table, post_id)
+    }
+
     public(friend) fun emit_post_created(post_created: PostEvent) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
+        assert!(exists<Events>(genesis_account::resource_account_address()), ENotInitialized);
+        let events = borrow_global_mut<Events>(genesis_account::resource_account_address());
         event::emit_event(&mut events.post_event_handle, post_created);
     }
 
     public(friend) fun emit_post_deleted(post_deleted: PostEvent) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
+        assert!(exists<Events>(genesis_account::resource_account_address()), ENotInitialized);
+        let events = borrow_global_mut<Events>(genesis_account::resource_account_address());
         event::emit_event(&mut events.post_event_handle, post_deleted);
     }
 

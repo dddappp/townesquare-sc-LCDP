@@ -14,10 +14,10 @@ module townesquare_sc::user {
     friend townesquare_sc::user_update_logic;
     friend townesquare_sc::user_aggregate;
 
-    const EID_ALREADY_EXISTS: u64 = 101;
-    const EDATA_TOO_LONG: u64 = 102;
-    const EINAPPROPRIATE_VERSION: u64 = 103;
-    const ENOT_INITIALIZED: u64 = 110;
+    const EIdAlreadyExists: u64 = 101;
+    const EDataTooLong: u64 = 102;
+    const EInappropriateVersion: u64 = 103;
+    const ENotInitialized: u64 = 110;
 
     struct Events has key {
         user_created_handle: event::EventHandle<UserCreated>,
@@ -67,7 +67,7 @@ module townesquare_sc::user {
     }
 
     public(friend) fun set_username(user: &mut User, username: String) {
-        assert!(std::string::length(&username) <= 66, EDATA_TOO_LONG);
+        assert!(std::string::length(&username) <= 66, EDataTooLong);
         user.username = username;
     }
 
@@ -93,7 +93,7 @@ module townesquare_sc::user {
         profile_image: String,
         bio: String,
     ): User {
-        assert!(std::string::length(&username) <= 66, EDATA_TOO_LONG);
+        assert!(std::string::length(&username) <= 66, EDataTooLong);
         User {
             user_wallet,
             version: 0,
@@ -199,32 +199,32 @@ module townesquare_sc::user {
     public(friend) fun asset_user_not_exists(
         user_wallet: address,
     ) acquires Tables {
-        assert!(exists<Tables>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let tables = borrow_global_mut<Tables>(genesis_account::resouce_account_address());
-        assert!(!table::contains(&tables.user_table, user_wallet), EID_ALREADY_EXISTS);
+        assert!(exists<Tables>(genesis_account::resource_account_address()), ENotInitialized);
+        let tables = borrow_global_mut<Tables>(genesis_account::resource_account_address());
+        assert!(!table::contains(&tables.user_table, user_wallet), EIdAlreadyExists);
     }
 
     public(friend) fun update_version_and_add(user: User) acquires Tables {
         user.version = user.version + 1;
-        //assert!(user.version != 0, EINAPPROPRIATE_VERSION);
+        //assert!(user.version != 0, EInappropriateVersion);
         private_add_user(user);
     }
 
     public(friend) fun add_user(user: User) acquires Tables {
-        assert!(user.version == 0, EINAPPROPRIATE_VERSION);
+        assert!(user.version == 0, EInappropriateVersion);
         private_add_user(user);
     }
 
     public(friend) fun remove_user(user_wallet: address): User acquires Tables {
-        assert!(exists<Tables>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let tables = borrow_global_mut<Tables>(genesis_account::resouce_account_address());
+        assert!(exists<Tables>(genesis_account::resource_account_address()), ENotInitialized);
+        let tables = borrow_global_mut<Tables>(genesis_account::resource_account_address());
         table::remove(&mut tables.user_table, user_wallet)
     }
 
     fun private_add_user(user: User) acquires Tables {
-        assert!(exists<Tables>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let tables = borrow_global_mut<Tables>(genesis_account::resouce_account_address());
-        table::add(&mut tables.user_table, user_wallet(&user), user);
+        assert!(exists<Tables>(genesis_account::resource_account_address()), ENotInitialized);
+        let tables = borrow_global_mut<Tables>(genesis_account::resource_account_address());
+        table::add(&mut tables.user_table, user.user_wallet, user);
     }
 
     public fun get_user(user_wallet: address): pass_object::PassObject<User> acquires Tables {
@@ -247,15 +247,20 @@ module townesquare_sc::user {
         } = user;
     }
 
+    public fun contains_user(user_wallet: address): bool acquires Tables {
+        let tables = borrow_global<Tables>(genesis_account::resource_account_address());
+        table::contains(&tables.user_table, user_wallet)
+    }
+
     public(friend) fun emit_user_created(user_created: UserCreated) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
+        assert!(exists<Events>(genesis_account::resource_account_address()), ENotInitialized);
+        let events = borrow_global_mut<Events>(genesis_account::resource_account_address());
         event::emit_event(&mut events.user_created_handle, user_created);
     }
 
     public(friend) fun emit_user_updated(user_updated: UserUpdated) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
+        assert!(exists<Events>(genesis_account::resource_account_address()), ENotInitialized);
+        let events = borrow_global_mut<Events>(genesis_account::resource_account_address());
         event::emit_event(&mut events.user_updated_handle, user_updated);
     }
 

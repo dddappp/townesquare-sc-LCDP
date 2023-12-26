@@ -14,7 +14,7 @@ module townesquare_sc::genesis_account {
     friend townesquare_sc::user;
     friend townesquare_sc::townesquare_state;
 
-    const ENOT_GENESIS_ACCOUNT: u64 = 100;
+    const ENotGenesisAccount: u64 = 100;
 
     struct Events has key {
         resource_account_created_handle: event::EventHandle<ResourceAccountCreated>,
@@ -35,19 +35,24 @@ module townesquare_sc::genesis_account {
 
         let events = borrow_global_mut<Events>(signer::address_of(account));
         event::emit_event(&mut events.resource_account_created_handle, ResourceAccountCreated {
-            address: resouce_account_address(),
+            address: resource_account_address(),
         });
     }
 
     public fun assert_genesis_account(account: &signer) {
-        assert!(signer::address_of(account) == @townesquare_sc, error::invalid_argument(ENOT_GENESIS_ACCOUNT));
+        assert!(signer::address_of(account) == @townesquare_sc, error::invalid_argument(ENotGenesisAccount));
     }
 
     public(friend) fun resource_account_signer(): signer {
         resource_account::resource_account_signer(@townesquare_sc)
     }
 
-    public fun resouce_account_address(): address {
+    public fun resource_account_signer_for_genesis_account(account: &signer): signer {
+        assert_genesis_account(account);
+        resource_account_signer()
+    }
+
+    public fun resource_account_address(): address {
         let res_account = resource_account::resource_account_signer(@townesquare_sc);
         signer::address_of(&res_account)
     }

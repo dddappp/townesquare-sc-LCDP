@@ -13,9 +13,9 @@ module townesquare_sc::townesquare_state {
     friend townesquare_sc::townesquare_state_delete_logic;
     friend townesquare_sc::townesquare_state_aggregate;
 
-    const EDATA_TOO_LONG: u64 = 102;
-    const EINAPPROPRIATE_VERSION: u64 = 103;
-    const ENOT_INITIALIZED: u64 = 110;
+    const EDataTooLong: u64 = 102;
+    const EInappropriateVersion: u64 = 103;
+    const ENotInitialized: u64 = 110;
 
     struct Events has key {
         townesquare_state_created_handle: event::EventHandle<TownesquareStateCreated>,
@@ -161,18 +161,18 @@ module townesquare_sc::townesquare_state {
 
     public(friend) fun update_version_and_add(townesquare_state: TownesquareState) {
         townesquare_state.version = townesquare_state.version + 1;
-        //assert!(townesquare_state.version != 0, EINAPPROPRIATE_VERSION);
+        //assert!(townesquare_state.version != 0, EInappropriateVersion);
         private_add_townesquare_state(townesquare_state);
     }
 
     public(friend) fun add_townesquare_state(townesquare_state: TownesquareState) {
-        assert!(townesquare_state.version == 0, EINAPPROPRIATE_VERSION);
+        assert!(townesquare_state.version == 0, EInappropriateVersion);
         private_add_townesquare_state(townesquare_state);
     }
 
     public(friend) fun remove_townesquare_state(): TownesquareState acquires TownesquareState {
-        assert!(exists<TownesquareState>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        move_from<TownesquareState>(genesis_account::resouce_account_address())
+        assert!(exists<TownesquareState>(genesis_account::resource_account_address()), ENotInitialized);
+        move_from<TownesquareState>(genesis_account::resource_account_address())
     }
 
     fun private_add_townesquare_state(townesquare_state: TownesquareState) {
@@ -185,17 +185,17 @@ module townesquare_sc::townesquare_state {
     }
 
     public fun singleton_is_emergency(): bool acquires TownesquareState {
-        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resouce_account_address());
+        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resource_account_address());
         townesquare_state.is_emergency
     }
 
     public fun singleton_user_admin(): address acquires TownesquareState {
-        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resouce_account_address());
+        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resource_account_address());
         townesquare_state.user_admin
     }
 
     public fun singleton_post_admin(): address acquires TownesquareState {
-        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resouce_account_address());
+        let townesquare_state = borrow_global<TownesquareState>(genesis_account::resource_account_address());
         townesquare_state.post_admin
     }
 
@@ -213,21 +213,25 @@ module townesquare_sc::townesquare_state {
         } = townesquare_state;
     }
 
+    public fun townesquare_state_exists(): bool {
+        exists<TownesquareState>(genesis_account::resource_account_address())
+    }
+
     public(friend) fun emit_townesquare_state_created(townesquare_state_created: TownesquareStateCreated) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
+        assert!(exists<Events>(genesis_account::resource_account_address()), ENotInitialized);
+        let events = borrow_global_mut<Events>(genesis_account::resource_account_address());
         event::emit_event(&mut events.townesquare_state_created_handle, townesquare_state_created);
     }
 
     public(friend) fun emit_townesquare_state_updated(townesquare_state_updated: TownesquareStateUpdated) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
+        assert!(exists<Events>(genesis_account::resource_account_address()), ENotInitialized);
+        let events = borrow_global_mut<Events>(genesis_account::resource_account_address());
         event::emit_event(&mut events.townesquare_state_updated_handle, townesquare_state_updated);
     }
 
     public(friend) fun emit_townesquare_state_deleted(townesquare_state_deleted: TownesquareStateDeleted) acquires Events {
-        assert!(exists<Events>(genesis_account::resouce_account_address()), ENOT_INITIALIZED);
-        let events = borrow_global_mut<Events>(genesis_account::resouce_account_address());
+        assert!(exists<Events>(genesis_account::resource_account_address()), ENotInitialized);
+        let events = borrow_global_mut<Events>(genesis_account::resource_account_address());
         event::emit_event(&mut events.townesquare_state_deleted_handle, townesquare_state_deleted);
     }
 
