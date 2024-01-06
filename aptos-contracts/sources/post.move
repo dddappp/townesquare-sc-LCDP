@@ -18,6 +18,11 @@ module townesquare_sc::post {
     const EInappropriateVersion: u64 = 103;
     const ENotInitialized: u64 = 110;
 
+    struct PostIdGenerator has key {
+        sequence: u128,
+    }
+
+
     struct Events has key {
         // post_id_generator_created_handle: event::EventHandle<PostIdGeneratorCreated>,
         post_event_handle: event::EventHandle<PostEvent>,
@@ -26,11 +31,6 @@ module townesquare_sc::post {
     struct Tables has key {
         post_table: Table<u128, Post>,
     }
-
-    struct PostIdGenerator has key {
-        sequence: u128,
-    }
-
 
     public fun initialize(account: &signer) {
         genesis_account::assert_genesis_account(account);
